@@ -17,23 +17,27 @@ func check(e error) {
 	}
 }
 
+func procLine(line string, delim string, field int, last bool) string {
+	fields := strings.Split(line, delim)
+
+	dateField := fields[field-1]
+
+	// change formt
+	t, _ := time.Parse("2006-01-02", dateField)
+
+	if last {
+		return fmt.Sprintf("%s%s%s", line, delim, t.Format("Monday"))
+	} else {
+		return fmt.Sprintf("%s%s%s", t.Format("Monday"), delim, line)
+	}
+
+}
 func annodate(r io.Reader, delim string, field int, last bool) {
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text() // Println will add back the final '\n'
-		fields := strings.Split(line, delim)
-
-		dateField := fields[field-1]
-		// change formt
-		t, _ := time.Parse("2006-01-02", dateField)
-		delim := delim
-		if last {
-			fmt.Printf("%s%s%s\n", line, delim, t.Format("Monday"))
-		} else {
-			fmt.Printf("%s%s%s\n", t.Format("Monday"), delim, line)
-		}
-
+		fmt.Printf("%s\n", procLine(line, delim, field, last))
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
